@@ -1,0 +1,157 @@
+#coding=utf-8
+from django.conf import settings
+from django.db import models
+from django import forms
+import datetime
+from libs.modelfields import PickleField, JSONField
+if getattr(settings, 'USE_CPICKLE', False):
+    import cPickle as pickle
+else:
+    import pickle
+
+
+
+
+class EAVWidget(forms.widgets.MultiWidget):
+    """
+    
+    """
+    def __init__(self, add_fields=None, attrs={}):
+        self.add_fields = add_fields or []
+        attrs['style'] = 'width: 5em;'
+        widgets = [forms.widgets.TextInput(attrs=attrs) for i in xrange(len(self.add_fields))]
+        super(EAVWidget, self).__init__(widgets, attrs)
+
+    def format_output(self, rendered_widgets):
+        if self.add_fields:
+            out = ['<table><tr>']
+            for i, w in enumerate(rendered_widgets):
+                out += ['<td style="padding:0 4px 0 0; border:0;">',
+                        '<label style="white-space: nowrap;">',
+                        self.add_fields[i].name, 
+                        ':&nbsp;', 
+                        w,
+                        '</label></td>']
+            out += ['</tr></table>']
+        else:
+            out = rendered_widgets
+        return u''.join(out)
+    
+    def decompress(self, value):
+        try:
+            out = []
+            for f in self.add_fields:
+                out.append(value.get(f.slug, ''))
+            return out
+        except:
+            return [None]*len(self.add_fields)
+
+
+
+class EAVField(forms.fields.MultiValueField):
+    widget=EAVWidget
+    
+    def __init__(self, add_fields=None, *args, **kwargs):
+        self.add_fields = add_fields or []
+        if self.add_fields:
+            fields = [forms.fields.CharField(required=False) for i in xrange(len(add_fields))]
+            self.widget = self.widget(add_fields)
+        else:
+            fields = []
+        super(EAVField, self).__init__(fields, *args, **kwargs)
+    
+    def compress(self, data_list):
+        out = {}
+        for i,f in enumerate(self.add_fields):
+            try:
+                out[f.slug] = data_list[i]
+            except IndexError:
+                out[f.slug] = ''
+
+        return out      
+
+
+
+class EAV_PickleField(PickleField):
+    editable = True
+
+class EAV_JSONField(JSONField):
+    def formfield(self, **kwargs):
+        kwargs['form_class'] = EAVField
+        kwargs['widget'] = EAVWidget
+        return super(EAV_JSONField, self).formfield(**kwargs)    
+
+
+
+
+class EAV_FieldsModel(models.Model):
+    '''
+    Базовый класс для модели, содержащий описания EAV полей,
+    наследники данной модели должны обязательно содержать:
+    
+      - ForeignKey на модель к которой будут привязаны EAV поля, пример:
+        category = models.ForeignKey(Category, blank=False) 
+    
+      - Порядок сортировки в Meta классе модели, пример:
+        ordering = ['category', 'sort', 'id']
+    
+      - Иникальный индекс в Meta классе модели, пример:
+        unique_together = ('category', 'slug')
+
+    '''
+    sort        = models.PositiveSmallIntegerField(u'Порядок сортировки', default=500, null=True) 
+    slug        = models.SlugField(u'Код. имя', max_length=255, blank=False)
+    name        = models.CharField(u'Название', max_length=50, blank=False)
+   
+
+class EAV_Model(models.Model):
+    '''
+    Базовый класс для модели, содержащий значений EAV полей
+    '''
+    fields_cache= EAV_JSONField(u'Доп. параметры', editable=True)
+
+class EAV_AdminInline(admin.TabularInline):
+    '''
+    Встроенный модуль редактирования модификаций
+    '''
+    
+    #model = наследник от EAV_Model
+    
+    def __init__(self):
+        if not isinstance(self.model, EAV_Model):
+            raise Exception('Поле модель у EAV_AdminInline должен быть классом-наследником от EAV_Model')
+        if 'fields_cache' not in self.fields:
+            raise Exception('В списке отображаемых полей отсутствует fields_cache')
+    
+    def get_eav_fields(self, obj):
+        '''
+        return obj.category.add_fields.all()
+        '''
+        raise Exception('Функция get_eav_fields должна быть переопределена наследником')
+    
+    def get_formset(self, request, obj=None, **kwargs):
+        '''
+        Хак заменяющий форму на специальную, в которой поле `fields_cache` меняется на EAV поле
+        в зависимости от доп. полей категории объекта
+        '''
+        def eav_form_factory(obj):
+            # Получаем список доп. полей категории указанного объекта
+            add_fields = list( self.get_eav_fields(obj) )
+            class EAVForm(forms.ModelForm):
+                # Передаем список в конструктор EAV поля
+                fields_cache = EAVField(add_fields, label=u'Доп. параметры', required=False) 
+         
+                class Meta:
+                    model = self.model
+            
+            return EAVForm
+        
+        if obj and self.get_eav_fields(obj):
+            # Если объект сохранен и указана его категория, то меняем формы
+            self.form = eav_form_factory(obj)
+        else:
+            # Иначе не показываем ни одной формы
+            self.extra = 0
+            
+        return super(EAV_AdminInline, self).get_formset(request, obj, **kwargs)
+      

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{{ object.question }} - Опросы - {{ block.super }} {% endblock %}
+{% block breadcrumbs %}<a href="{% url polls_index %}">Все опросы</a>{% endblock %}
+
+{% block content %}
+<h1>{{ object.question }}</h1>
+<p>{{ object.description }}</p>
+
+
+{% with object.votes_sum as agr %}
+
+<div class="poll">
+	<ul class="answers">
+		{% for choice in object.choice_set.all %}
+    		<li>{{ choice.choice }} ({% widthratio choice.votes agr.votes__sum 100 %}% голосов) 
+				<div class="bar" style="width: {% widthratio choice.votes agr.votes__max 100 %}%"></div>
+			</li>
+		{% endfor %}
+	</ul>
+	<p class="stat">Всего проголосовало: {{ agr.votes__sum }}</p>	
+</div>	
+
+{% endwith %}
+<ul>
+</ul>
+
+{% endblock %}

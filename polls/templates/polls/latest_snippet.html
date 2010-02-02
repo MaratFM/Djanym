@@ -1,0 +1,43 @@
+{% if object %}
+
+{% if is_voted %}
+
+
+<div class="block poll">
+	<p class="question">{{ object.question }}</p>
+	<ul class="answers">
+		{% for choice in choices %}
+    		<li>{{ choice.choice }} ({% widthratio choice.votes agregators.votes__sum 100 %}% голосов) 
+				<div class="bar" style="width: {% widthratio choice.votes agregators.votes__max 100 %}%"></div>
+			</li>
+		{% endfor %}
+	</ul>
+	<p class="stat">Всего проголосовало: {{ agregators.votes__sum }}</p>	
+</div>	
+
+
+{% else %}
+
+	
+<div class="block poll">
+<form action="{% url poll_vote object.id %}" method="post">
+<input type="hidden" name="redirect" value="{{ request.path }}" />
+	<p class="question">{{ object.question }}</p>
+	<ul class="answers">
+		{% for choice in choices %}
+			<li>
+    			<input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+    			<label for="choice{{ forloop.counter }}">{{ choice.choice }}</label>
+			</li>
+		{% endfor %}
+	</ul>
+	<p class="submit"><input type="submit" value="Проголосовать" /></p>
+</form>
+</div>	
+
+
+{% endif %}
+{% endif %}
+
+
+

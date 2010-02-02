@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}{{ object.question }} - Опросы - {{ block.super }} {% endblock %}
+{% block breadcrumbs %}<a href="{% url polls_index %}">Все опросы</a>{% endblock %}
+
+{% block content %}
+
+<h1>{{ object.question }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+{% if show_results %}
+
+{% ifequal object.status 2 %}
+<p>Данный опрос находится в архиве</p>
+{% else %}
+<p>Вы уже голосовали</p>
+{% endifequal %}
+
+{% with object.votes_sum as agr %}
+<div class="block poll">
+	<ul class="answers">
+		{% for choice in object.choice_set.all %}
+    		<li>{{ choice.choice }} ({% widthratio choice.votes agr.votes__sum 100 %}% голосов) 
+				<div class="bar" style="width: {% widthratio choice.votes agr.votes__max 100 %}%"></div>
+			</li>
+		{% endfor %}
+	</ul>
+	<p class="stat">Всего проголосовало: {{ agr.votes__sum }}</p>	
+</div>	
+{% endwith %}
+
+{% else %}
+
+<form action="{% url poll_vote object.id %}" method="post">
+<input type="hidden" name="redirect" value="{{ request.path }}" />
+	
+<div class="block poll">
+	<ul class="answers">
+		{% for choice in object.choice_set.all %}
+			<li>
+    			<input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+    			<label for="choice{{ forloop.counter }}">{{ choice.choice }}</label>
+			</li>
+		{% endfor %}
+	</ul>
+	<p class="submit"><input type="submit" value="Проголосовать" /></p>
+</div>	
+</form>
+<a href="{% url poll_results object.id %}">Результаты</a>
+
+{% endif %}
+
+{% endblock %}
+
+

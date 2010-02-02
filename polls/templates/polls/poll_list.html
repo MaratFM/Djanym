@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+
+        
+{% block title %}Опросы - {{ block.super }} {% endblock %}
+
+	
+{% block content %}
+
+<h1>Опросы</h1>
+{% for entry in object_list %}
+    <h3><a href="{{ entry.get_absolute_url }}">{{ entry.question }}</a>
+		{% ifequal entry.status 2 %}
+			[архив]
+		{% endifequal %}	
+	
+	</h3>
+{% empty %}
+	Опросов нет	
+{% endfor %}
+
+{% ifnotequal paginator.num_pages 1 %}
+<div class="hr"></div>
+<div class="pagination" style="float:right; margin-bottom: 1em;">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">&lt;&lt; Предыдущая</a>
+        {% endif %}
+
+        <span class="current">
+            Страница <b>{{ page_obj.number }}</b> из <b>{{ paginator.num_pages }}</b>.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Следующая &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% endifnotequal %}
+
+
+
+
+{% endblock %}

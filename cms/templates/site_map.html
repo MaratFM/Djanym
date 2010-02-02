@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load mptt_tags %}
+
+<h1>Карта сайта</h1>
+
+{% for category,structure in object_list|tree_info %}
+   {% if structure.new_level %}<ul><li>{% else %}</li><li>{% endif %}
+		<a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+   {% for level in structure.closed_levels %}</li></ul>{% endfor %}
+{% endfor %}
+
+{% endblock %}
+
