@@ -1,0 +1,10 @@
+.git
+.svn
+.gitignore
+*.pyc
+_thumbs
+.tmp_*
+.project
+.pydevproject
+extern/
+media/extern/

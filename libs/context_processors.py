@@ -1,5 +1,5 @@
 #coding=utf-8
-from libs.globals import globals
+from globals import globals
 
 def globals_processor(request):
     return {'globals': globals}

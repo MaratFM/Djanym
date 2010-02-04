@@ -5,14 +5,9 @@ from django.db.models import F
 from django.contrib.auth.models import User
 from sorl.thumbnail.fields import ImageWithThumbnailsField
 from tinymce.models import HTMLField
+from django.conf import settings
 
-APPLICATIONS = (
-                ('news.urls', u'Новости'),
-                ('catalog.urls', u'Каталог продукции'),
-                ('catalog.urls new', u'Каталог продукции - Новинки'),
-                ('catalog.urls search', u'Каталог продукции - Поиск'),
-                ('catalog.urls order', u'Каталог продукции - Заказ'),
-                )
+
 PAGE_TYPES = (
               (0, u'Статическая страница'),
               (1, u'Приложение'),
@@ -50,7 +45,7 @@ class Page(models.Model):
     title       = models.CharField(u'Заголовок', help_text=u'Будет показано в заголовке страницы', max_length=255, blank=True)
     content     = HTMLField('Текст страницы', blank=True)
     link        = models.ForeignKey('self', blank=True, null=True, related_name='link_me', verbose_name=u'Ссылка/Дубликат:')
-    app_url     = models.CharField(u'Приложение', max_length=255, blank=True, choices=APPLICATIONS)
+    app_url     = models.CharField(u'Приложение', max_length=255, blank=True, choices=settings.CMS_APPLICATIONS)
 
     parent      = models.ForeignKey('self', blank=True, null=True, related_name='children', verbose_name=u'Родитель')
     lft         = models.PositiveIntegerField(blank=True, null=True, editable=False)

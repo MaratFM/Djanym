@@ -1,7 +1,7 @@
 from django.http import Http404
 from django.conf import settings
 from models import Page
-from libs.globals import globals
+from djanym.libs.globals import globals
 from copy import copy, deepcopy
 
 class MenuNode():
@@ -36,7 +36,10 @@ class MenuNode():
 
     @property
     def current(self):
-        return self==getattr(globals, 'page', None)
+        if self.page.type==1 and self==getattr(globals, 'page', None):
+            return globals.request.path == self.url
+        else:
+            return self==getattr(globals, 'page', None)
         
     def print_recursive(self, prefix=''):
         out = [prefix+self.__unicode__()]
@@ -89,6 +92,7 @@ def get_breadcrumbs(item):
 class CMSMiddleware:
     def process_request(self, request):
         globals.page = get_page(copy(request.path))
+        globals.request = request
         globals.breadcrumbs = get_breadcrumbs(globals.page)        
 #        print globals.breadcrumbs
 #        print '\n'.join([m.__str__() for m in globals.breadcrumbs])

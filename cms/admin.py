@@ -34,16 +34,9 @@ class PageAdmin(admin.ModelAdmin):
                          }),
     )     
     prepopulated_fields = {'slug': ('name',)}
-    
-    def parents_id(self, object):
-        return object.parent_id or 0
-    
-    class Media:
-        js = ("static/js/jquery-1.3.2.js",
-              "static/js/admin.js",
-              "static/js/jquery.tree.js",
-              )
+ 
 
+    
 admin.site.register(Page, PageAdmin)
 
 

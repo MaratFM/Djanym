@@ -13,7 +13,10 @@ for page in Page.objects.all().order_by('-tree_id', '-lft'):
         
     if page.type==0:
         # Статическая страница
-        urls.append((r'^(?P<url>%s)/$' % url, static_view ))
+        if url:
+            urls.append((r'^(?P<url>%s)/$' % url, static_view ))
+        else:
+            urls.append((r'^(?P<url>%s)$' % url, static_view ))
     elif page.type==1:
         # Приложение
         module_attr = page.app_url.split(' ', 1)

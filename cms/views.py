@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.xheaders import populate_xheaders
 from django.utils.safestring import mark_safe
 
-DEFAULT_TEMPLATE = 'flatpages/default.html'
+DEFAULT_TEMPLATE = 'cms/default.html'
 
 def static_view(request, url):
     """
