@@ -32,7 +32,15 @@ class PageAdmin(admin.ModelAdmin):
                                     'content',
                                     )
                          }),
-    )     
+                 ('SEO', {
+                          'classes': ('collapse',),
+                          'fields': (
+                                     'seo_title', 
+                                     'seo_description', 
+                                     'seo_keywords',
+                                     )
+                          }),
+                )     
     prepopulated_fields = {'slug': ('name',)}
  
 

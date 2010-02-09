@@ -55,6 +55,10 @@ class Page(models.Model):
 
     status      = models.PositiveSmallIntegerField(u'Статус', choices=STATUS_CHOICES, default=STATUS_ACTIVE)    
 
+    seo_keywords= models.CharField(u'SEO ключевые слова', max_length=255, blank=True, help_text=u'Максимум 250 знаков, до 20 слов, должен содержать только те слова, которые на самом деле используются на странице') 
+    seo_title   = models.CharField(u'SEO заголовок', max_length=255, blank=True, help_text=u'Длина 50-80 знаков.')
+    seo_description = models.CharField(u'SEO описание', max_length=255, blank=True, help_text=u'Длина 150-200 знаков.')
+
     objects     = models.Manager()
     active_objects = ActiveManager()
     

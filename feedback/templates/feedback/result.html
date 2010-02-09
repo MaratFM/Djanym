@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	{{ message }}
+	{{ block.super }} 
+{% endblock %}
+
+{% block breadcrumbs %}{{ block.super }}{{ message }}{% endblock %}
+
+{% block content %}
+
+<h1>{{ message }}</h1>
+
+{% if form %}
+<form id="feedback" method="post" action="{% url feedback %}">{% csrf_token %}
+<table class="emptyv">
+	{{ form }}
+	<tr><td colspan="2" style="text-align: center;"><center><input type="submit" value="Отправить вопрос" /></center></td></tr>	
+</table>
+</form>
+{% endif %}
+
+{% endblock %}

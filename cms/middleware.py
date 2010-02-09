@@ -3,6 +3,7 @@ from django.conf import settings
 from models import Page
 from djanym.libs.globals import globals
 from copy import copy, deepcopy
+from django.core.cache import cache
 
 class MenuNode():
     def __init__(self, page, level=0, parent=None, children=[]):
