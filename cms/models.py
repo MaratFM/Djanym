@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from sorl.thumbnail.fields import ImageWithThumbnailsField
 from tinymce.models import HTMLField
 from django.conf import settings
-
+from sub_thread import clear_cache
 
 PAGE_TYPES = (
               (0, u'Статическая страница'),
@@ -55,9 +55,9 @@ class Page(models.Model):
 
     status      = models.PositiveSmallIntegerField(u'Статус', choices=STATUS_CHOICES, default=STATUS_ACTIVE)    
 
-    seo_keywords= models.CharField(u'SEO ключевые слова', max_length=255, blank=True, help_text=u'Максимум 250 знаков, до 20 слов, должен содержать только те слова, которые на самом деле используются на странице') 
     seo_title   = models.CharField(u'SEO заголовок', max_length=255, blank=True, help_text=u'Длина 50-80 знаков.')
-    seo_description = models.CharField(u'SEO описание', max_length=255, blank=True, help_text=u'Длина 150-200 знаков.')
+    seo_description = models.TextField(u'SEO описание', max_length=255, blank=True, help_text=u'Длина 150-200 знаков.')
+    seo_keywords= models.TextField(u'SEO ключевые слова', max_length=255, blank=True, help_text=u'Максимум 250 знаков, до 20 слов, должен содержать только те слова, которые на самом деле используются на странице') 
 
     objects     = models.Manager()
     active_objects = ActiveManager()
@@ -69,6 +69,7 @@ class Page(models.Model):
         '''
 #        if not test_url:
 #            return super(Page, self).save(force_insert, force_update)
+        self.title = self.title or self.name
         
         old_url = self.url
         
@@ -94,13 +95,17 @@ class Page(models.Model):
                            [repl, old_len, 
                             self.tree_id, self.lft, self.rght])
            
-        self.title = self.title or self.name
+            super(Page, self).save(force_insert, force_update)
+#            from urls import urlpatterns
+#            urlpatterns.clear_cache()
+            # Обновляем urls если поменялся путь
+            clear_cache(1)
+        # Обновляем menu    
+        clear_cache(0)
+#        init_menu()
+        
         super(Page, self).save(force_insert, force_update)
-        from middleware import init_menu
-        init_menu()
-        from django.core.urlresolvers import get_resolver
-        get_resolver(None)
-    
+        
 #    @models.permalink
     def get_absolute_url(self):
         if self.url:

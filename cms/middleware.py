@@ -4,6 +4,8 @@ from models import Page
 from djanym.libs.globals import globals
 from copy import copy, deepcopy
 from django.core.cache import cache
+from sub_thread import need_reload, log_threaded
+
 
 class MenuNode():
     def __init__(self, page, level=0, parent=None, children=[]):
@@ -92,6 +94,10 @@ def get_breadcrumbs(item):
 
 class CMSMiddleware:
     def process_request(self, request):
+        if need_reload(0):
+            globals.menu_list = []
+            globals.menu_tree = build_menu(Page.active_objects.filter(level=0))
+            log_threaded ('Init menu...')            
         globals.page = get_page(copy(request.path))
         globals.request = request
         globals.breadcrumbs = get_breadcrumbs(globals.page)        
@@ -99,12 +105,7 @@ class CMSMiddleware:
 #        print '\n'.join([m.__str__() for m in globals.breadcrumbs])
 
 
-def init_menu():
-    globals.menu_list = []
-    globals.menu_tree = build_menu(Page.active_objects.filter(level=0))
-    print 'Init menu...'
 
-init_menu()
 
 #print ''.join([m.print_recursive('\n') for m in menu_tree])
 #print '\n\n', '\n'.join([m.__unicode__() for m in menu_list])
