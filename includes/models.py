@@ -13,7 +13,7 @@ class Includes(models.Model):
     Модель содержащая элементы каталог
     '''
     name        = models.CharField(u'Название', max_length=255)
-    content     = HTMLField(u'Содержание')
+    content     = HTMLField(u'Содержание', blank=True)
     
     class Meta():
         verbose_name = u'включаемая область'

@@ -4,7 +4,7 @@ from djanym.libs.globals import globals
 import os
 
 def log_threaded(s):
-    print '%-40s #%4s (%s)' % (s, os.getpid(), threading.currentThread().name)
+    print '%-40s #%4s (%s)' % (s, os.getpid(), threading.currentThread().getName())
 
 def get_version():
     return '%025.10f' % time.time()
