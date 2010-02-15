@@ -2,11 +2,20 @@
 from django.contrib import admin
 from models import *
 from tinymce.widgets import TinyMCE
+from tree_admin import MpttAdmin
 
-class PageAdmin(admin.ModelAdmin):
+class PageAdmin(MpttAdmin): #admin.ModelAdmin):
     '''
     Administrative interface for Page model
     '''
+    
+    tree_title_field = 'name'
+    tree_display = ('name','slug','url', 'title')
+    prepopulated_fields = {"slug": ("name",)}
+    
+    class Meta:
+        model = Page    
+    
     actions = []
     actions_on_top = False
     actions_on_bottom = True    
@@ -43,7 +52,24 @@ class PageAdmin(admin.ModelAdmin):
                 )     
     prepopulated_fields = {'slug': ('name',)}
  
+    class Media:
+        css = {
+#            "all": ("extern/djanym_cms/admin.css",
+#                    "extern/js_tree/themes/default/style.css"
+#                    )
+        }
+        js = (
+              "extern/jquery/jquery-1.3.2.js",
+              "extern/js_tree/jquery.tree.js",
+              "extern/js_tree/plugins/jquery.tree.contextmenu.js",
+              "extern/djanym_cms/jstree_admin.js",
+#              "extern/djanym_cms/admin.js",
+              )
 
+#    def queryset(self, request):
+#        qs = self.model._default_manager.filter(level=0).order_by('tree_id', 'lft')
+#        print qs
+#        return qs    
     
 admin.site.register(Page, PageAdmin)
 

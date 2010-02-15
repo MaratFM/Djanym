@@ -1,7 +1,7 @@
 #coding=utf-8
 from django.conf.urls.defaults import patterns, url as gen_url, include
 from django.utils.importlib import import_module    
-from views import static_view
+from views import static_view, cms_pages
 from models import Page
 from sub_thread import need_reload, log_threaded
     
@@ -44,6 +44,8 @@ def gen_patterns():
             pass
     
     log_threaded('Add url patterns...')
+    
+    urls.append(gen_url(r'^cms_ajax_pages/', cms_pages, name='cms_pages'))
     return patterns('', *urls)
 
 

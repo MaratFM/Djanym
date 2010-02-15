@@ -9,11 +9,13 @@ register = template.Library()
 def render_latest_poll(request):
     object, agregators, choices = cache.get('latest_poll_object') or (None,None,None)    
     if not object:
-        object = Poll.active.filter(status=OBJ_STATUS_PUBLIC).select_related()[0]
+        try:
+            object = Poll.active.filter(status=OBJ_STATUS_PUBLIC).select_related()[0]
+        except IndexError:
+            return {}
         agregators = object.votes_sum()
         choices = object.choice_set.all()
         cache.set('latest_poll_object', (object, agregators, choices))
-    print object.is_voted(request)
     return {
             'request': request,
             'object': object,

@@ -120,6 +120,9 @@ class Page(models.Model):
             
     def __unicode__(self):       
         return u'%s %s' % ('--'*self.level,self.name)
-
-mptt.register(Page, order_insertion_by=['sort', 'name'] )
+    
+try:
+    mptt.register(Page, order_insertion_by=['sort', 'name'] )
+except mptt.AlreadyRegistered:
+    pass
     

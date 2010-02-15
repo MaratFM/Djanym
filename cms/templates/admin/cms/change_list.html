@@ -1,0 +1,110 @@
+{% extends "admin/change_list.html" %}
+{% load adminmedia admin_list i18n %}
+
+
+{% block result_list %}
+  {% if action_form and actions_on_top and cl.full_result_count %}{% admin_actions %}{% endif %}
+
+
+<script type="text/javascript">
+var async_url = '{% url cms_pages %}';
+var init_data = [	
+{% for page in cl.result_list %}
+	{ 
+		attributes: { "id": "page_{{ page.id}}" }, 
+		data: { title: "{{ page.name }}",  attributes: {class: "page", href: "{{ page.id }}/"} },
+	{% if page.get_descendant_count %}		 
+		state:  "closed",
+		children: [
+					{% for p in page.children.all %}
+					{ 
+						attributes: { "id": "page_{{ p.id }}" }, 
+						data: { title: "{{ p.name }}",  attributes: {class: "page", href: "{{ p.id }}/"} },		 
+						state: {% if p.get_descendant_count %}"closed"{% else %}"opened"{% endif %},
+						children: []
+					}{% if not forloop.last %},{% endif %}
+					{% endfor %}
+					]
+	{% else %}
+		state: "opened", 
+		children: []
+	{% endif %}
+		
+	}{% if not forloop.last %},{% endif %}
+{% endfor %}
+];
+
+</script>
+<style>
+#pages_tree ul	li { text-align:left; }
+#pages_tree {
+
+	float: left;
+}
+#ttt {
+	
+}
+#ttt, #ttt tr, #ttt td {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+#ttt td {
+	color:black;
+	height:16px;
+	line-height:16px;
+	margin:0;
+	padding:1px 4px;
+	text-decoration:none;
+	white-space:nowrap;	
+}
+
+/*#pages_tree a{
+	display: block;
+	background-color: #eee;
+	width: 100%;
+}*/
+</style>
+<div style="position: relative;">
+
+<table id="ttt" cellspacing="0">
+	<tr><td rowspan="1000"><div id="pages_tree"></div></td></tr>
+	<tr style="background-color:#eee;"><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr style="background-color:#eee;"><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr style="background-color:#eee;"><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr style="background-color:#eee;"><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr style="background-color:#eee;"><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr style="background-color:#eee;"><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr style="background-color:#eee;"><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+	<tr><td>asfd</td><td>asfd</td><td>asfd</td></tr>
+</table>
+</div>
+<br clear="all" />
+<!--
+{% if cl.result_list %}
+	<table cellspacing="0">
+		<thead>
+			<tr>
+				<th>1</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for result in cl.result_list %}
+				<tr class="{% cycle 'row1' 'row2' %}">
+					<td><a href="{{ result.id }}/">{{ result.name }}</a></td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endif %}
+-->
+
+
+  {% if action_form and actions_on_bottom and cl.full_result_count %}{% admin_actions %}{% endif %}
+{% endblock %}
