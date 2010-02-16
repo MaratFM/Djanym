@@ -6,7 +6,8 @@ from models import Page
 from sub_thread import need_reload, log_threaded
     
 def gen_patterns():
-    # Первый аргумент функции patterns ''
+    '''
+    '''
     urls = [] 
     for page in Page.objects.all().order_by('-tree_id', '-lft'):
         url = page.url
@@ -21,9 +22,7 @@ def gen_patterns():
                 urls.append((r'^(?P<url>%s)$' % url, static_view ))
         elif page.type==1:
             # Приложение
-           
             module_attr = page.app_url.split(' ', 1)
-#            print '----', (r'^%s/' % url, include(module_attr[0]) )
             if len(module_attr)>1:
                 # Приложение с указанием модуля
                 pats = getattr( import_module(module_attr[0]), module_attr[1])
@@ -36,9 +35,11 @@ def gen_patterns():
             pass
         elif page.type==3:
             # Дубликат - страница существует
+            #TODO:
             pass
         elif page.type==4:
             # Ссылка
+            #TODO:
             pass
         else:
             pass
@@ -58,7 +59,6 @@ def gen_patterns():
     urlconf_module = property(_get_urlconf_module)
     
 class cms_patterns:
-    
     def __init__(self):
         self._patterns_cache = None
     
