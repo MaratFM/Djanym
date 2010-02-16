@@ -29,7 +29,7 @@ def vote(request, object_id):
         request.session['vote_%s' % p.id] = True
 
 #        print request.session._session_key
-        print request.session.keys
+#        print request.session.keys
             
         if request.POST.get('redirect'):
             return HttpResponseRedirect(request.POST['redirect'])

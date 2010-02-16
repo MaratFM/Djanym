@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.core.xheaders import populate_xheaders
 from django.utils.safestring import mark_safe
+from libs.shortcuts import render_to
 
 DEFAULT_TEMPLATE = 'cms/default.html'
 
@@ -32,3 +33,12 @@ def static_view(request, url):
     })
     response = HttpResponse(t.render(c))
     return response
+
+
+@render_to('site_map.html')
+def site_map(request):
+    return {'object_list': Page.objects.all()}
+
+@render_to('search.html')
+def search(request):
+    return {}

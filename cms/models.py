@@ -6,22 +6,9 @@ from django.contrib.auth.models import User
 from sorl.thumbnail.fields import ImageWithThumbnailsField
 from tinymce.models import HTMLField
 from django.conf import settings
-from sub_thread import clear_cache
+from interprocess import interprocess
+from constants import *
 
-PAGE_TYPES = (
-              (0, u'Статическая страница'),
-              (1, u'Приложение'),
-              (2, u'Перенаправление'),
-              (3, u'Дубликат'),
-              (4, u'Ссылка'),
-              )
-
-STATUS_HIDDEN = 0
-STATUS_ACTIVE = 1
-STATUS_CHOICES = (
-    (0, 'Скрыт.'),
-    (1, 'Активн.'),
-)
 
 class ActiveManager(models.Manager):
     def get_query_set(self):
@@ -37,13 +24,14 @@ class Page(models.Model):
     '''
     
     type        = models.PositiveSmallIntegerField(u'Тип страницы', blank=False, default=0, choices=PAGE_TYPES, editable=True)
+    status      = models.PositiveSmallIntegerField(u'Статус', choices=STATUS_CHOICES, default=STATUS_ACTIVE)    
     slug        = models.SlugField(u'Лат. написание', help_text=u'Должно быть уникальным среди страниц одного уровня', blank=True, max_length=40)#, unique_for_month="created")
     url         = models.CharField(u'URL', max_length=255, blank=True, editable=False)
     sort        = models.PositiveSmallIntegerField(u'Порядок сортировки', default=500) 
 
     name        = models.CharField(u'Название', help_text=u'Будет показано в меню, должно быть коротким: 1-2 слова', max_length=50)
-    title       = models.CharField(u'Заголовок', help_text=u'Будет показано в заголовке страницы', max_length=255, blank=True)
-    content     = HTMLField('Текст страницы', blank=True)
+    title       = models.CharField(u'Заголовок', help_text=u'Будет показано в заголовке страницы H1, для ссылки здесь должна быть сама ссылка', max_length=255, blank=True)
+    content     = HTMLField('Текст страницы', blank=True, help_text=u'Только если тип страницы-статическая страница')
     link        = models.ForeignKey('self', blank=True, null=True, related_name='link_me', verbose_name=u'Ссылка/Дубликат:')
     app_url     = models.CharField(u'Приложение', max_length=255, blank=True, choices=settings.CMS_APPLICATIONS)
 
@@ -52,8 +40,6 @@ class Page(models.Model):
     rght        = models.PositiveIntegerField(blank=True, null=True, editable=False)
     tree_id     = models.PositiveIntegerField(blank=True, null=True, editable=False)
     level       = models.PositiveIntegerField(blank=True, null=True, editable=False)
-
-    status      = models.PositiveSmallIntegerField(u'Статус', choices=STATUS_CHOICES, default=STATUS_ACTIVE)    
 
     seo_title   = models.CharField(u'SEO заголовок', max_length=255, blank=True, help_text=u'Длина 50-80 знаков.')
     seo_description = models.TextField(u'SEO описание', max_length=255, blank=True, help_text=u'Длина 150-200 знаков.')
@@ -67,8 +53,6 @@ class Page(models.Model):
         При сохранении добавляем к пути категориии путь её родителя,
         а также заполняем полное имя при его отсутствии
         '''
-#        if not test_url:
-#            return super(Page, self).save(force_insert, force_update)
         self.title = self.title or self.name
         
         old_url = self.url
@@ -86,9 +70,11 @@ class Page(models.Model):
 #            for p in self.get_descendants():
 #                p.url = new_url +'/'+ p.url[old_len:]
 #                p.save(test_url=False)
-
+            
+            
             from django.db import connection, transaction
             cursor = connection.cursor()
+            # обновляем пути всех дочерних веток
             cursor.execute('UPDATE '+self._meta.db_table+''' 
                             SET url = CONCAT(%s, SUBSTRING(url FROM %s)) 
                             WHERE tree_id = %s AND lft BETWEEN %s AND %s''', 
@@ -96,17 +82,16 @@ class Page(models.Model):
                             self.tree_id, self.lft, self.rght])
            
             super(Page, self).save(force_insert, force_update)
-#            from urls import urlpatterns
-#            urlpatterns.clear_cache()
-            # Обновляем urls если поменялся путь
-            clear_cache(1)
+
+        if self.url!=old_url:
+            # Обновляем urlpatterns если поменялся путь
+            interprocess.clear_key(IP_KEY_URLPATTERNS)
+            
         # Обновляем menu    
-        clear_cache(0)
-#        init_menu()
+        interprocess.clear_key(IP_KEY_MENU)
         
         super(Page, self).save(force_insert, force_update)
         
-#    @models.permalink
     def get_absolute_url(self):
         if self.url:
             return  '/%s/' % self.url
@@ -121,5 +106,8 @@ class Page(models.Model):
     def __unicode__(self):       
         return u'%s %s' % ('--'*self.level,self.name)
 
-mptt.register(Page, order_insertion_by=['sort', 'name'] )
+try:
+    mptt.register(Page, order_insertion_by=['sort', 'name'] )
+except mptt.AlreadyRegistered:
+    pass
     
