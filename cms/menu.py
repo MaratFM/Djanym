@@ -9,6 +9,10 @@ from interprocess import interprocess, log_threaded
 from constants import *
 
 class MenuNode(object):
+    '''
+    Класс пункта меню, необходим для построения дерева 
+    меню в памяти и последующего вывода в шаблонах
+    '''    
     def __init__(self, page, level=0, parent=None, children=[]):
         self.page = page
         self.name = self.page.name
@@ -37,6 +41,10 @@ class MenuNode(object):
         
     @property
     def selected(self):
+        '''
+        Возвращает True если этот пункт меню присутствует в навигационном пути
+        иными словами этот пункт активен либо активен один из его потомков
+        '''
         try:        
             return self==globals.breadcrumbs[self.level]
         except (AttributeError, IndexError):
@@ -44,6 +52,10 @@ class MenuNode(object):
 
     @property
     def current(self):
+        '''
+        Возвращает True если этот пункт меню активен, т.е. является текущей страницей
+        Для приложение возвращает True только для корневой страницы приложения
+        '''
         if self.page.type==PAGE_TYPE_APPLICATION and self==getattr(globals, 'page', None):
             return globals.request.path == self.url
         else:
@@ -72,7 +84,7 @@ class MenuNode(object):
 
 def build_menu(query_set, level=0, parent=None):
     '''
-    Строит дерево пунктов меню
+    Строит дерево пунктов меню, 
     возвращает список MenuNode корневого уровня, внутренние уровни содержат 
     элементы MenuNode в свойстве children
     
@@ -89,6 +101,9 @@ def build_menu(query_set, level=0, parent=None):
     return menu_tree
 
 def init_menu():
+    '''
+    Инициализирует/реинициализирует меню
+    '''
     globals.menu_list = []
     globals.menu_tree = build_menu(Page.active_objects.filter(level=0))
     log_threaded ('Init menu...')  
