@@ -10,7 +10,9 @@ def log_threaded(s):
     '''
     Выводит служебную информацию в консоль с добавлением сведений о текущем процессе и потоке
     '''
-    print '%-40s #%4s (%s)' % (s, os.getpid(), threading.currentThread().getName())
+    # нельзя ничего выводить для прохождения тестов
+    pass
+#    print '%-40s #%4s (%s)' % (s, os.getpid(), threading.currentThread().getName())
 
 
 class InterProcess(object):

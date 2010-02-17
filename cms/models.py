@@ -74,6 +74,7 @@ class Page(models.Model):
             
             from django.db import connection, transaction
             cursor = connection.cursor()
+            
             # обновляем пути всех дочерних веток
             cursor.execute('UPDATE '+self._meta.db_table+''' 
                             SET url = CONCAT(%s, SUBSTRING(url FROM %s)) 
@@ -81,8 +82,6 @@ class Page(models.Model):
                            [repl, old_len, 
                             self.tree_id, self.lft, self.rght])
            
-            super(Page, self).save(force_insert, force_update)
-
         if self.url!=old_url:
             # Обновляем urlpatterns если поменялся путь
             interprocess.clear_key(IP_KEY_URLPATTERNS)
@@ -106,8 +105,8 @@ class Page(models.Model):
     def __unicode__(self):       
         return u'%s %s' % ('--'*self.level,self.name)
 
-try:
-    mptt.register(Page, order_insertion_by=['sort', 'name'] )
-except mptt.AlreadyRegistered:
-    pass
+#try:
+mptt.register(Page, order_insertion_by=['sort', 'name'] )
+#except mptt.AlreadyRegistered:
+#    pass
     
