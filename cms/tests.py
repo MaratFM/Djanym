@@ -38,6 +38,10 @@ class SimpleTest(TestCase):
         self.assertEquals(self.page2.get_absolute_url(), '/about/')
         self.assertEquals(self.page3.url, 'about/history')
         self.assertEquals(self.page3.__unicode__(), '-- History')
+    
+    def test_managers(self):
+        self.assertEquals(list(Page.objects.all()), 
+                          [self.page1, self.page2, self.page3, self.page4] )
         self.assertEquals(list(Page.active_objects.all()), 
                           [self.page1, self.page2, self.page4] )
 
