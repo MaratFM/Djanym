@@ -9,7 +9,6 @@ from django.utils.safestring import mark_safe
 from libs.shortcuts import render_to
 import cjson
 
-
 DEFAULT_TEMPLATE = 'cms/default.html'
 
 def static_view(request, url):
