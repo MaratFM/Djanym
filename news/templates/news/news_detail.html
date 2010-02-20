@@ -1,14 +1,9 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
 
-
-
 {% block title %}{{ object.name }} - Новости компании - {{ block.super }} {% endblock %}
-
-	
-
-{% block breadcrumbs %}<a href="/news/">Все новости</a>{% endblock %}
-
+{% block breadcrumbs %} &gt; {{ object.name }}{% endblock %}
+{% block news %}{% endblock %}
 
 {% block content %}
     <h1>{{ object.name }}</h1>
@@ -21,4 +16,4 @@
 {% endblock %}
 
 
-{% block news %}{% endblock %}
+

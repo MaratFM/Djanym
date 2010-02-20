@@ -3,21 +3,25 @@
 
         
 {% block title %}Новости компании - {{ block.super }} {% endblock %}
-
+{% block news %}{% endblock %}
 	
 {% block content %}
 
 <h1>Новости компании</h1>
+<ul class="news">
 {% for entry in object_list %}
-    <h3><a href="{{ entry.get_absolute_url }}">{{ entry.name }}</a></h3>
-    {% if entry.picture %}
-        {% thumbnail entry.picture 64x64 crop as thumb %}
-        <img src="{{ thumb }}" width="{{ thumb.width }}" height="{{ thumb.height }}" align="left" style="margin: 0 1em 1em 0;">
-    {% endif %}
-    {{ entry.anounce|safe }}        
+	<li>
+	    <h3><a href="{{ entry.get_absolute_url }}">{{ entry.name }}</a></h3>
+	    {% if entry.picture %}
+	        {% thumbnail entry.picture 64x64 crop as thumb %}
+	        <img src="{{ thumb }}" width="{{ thumb.width }}" height="{{ thumb.height }}" align="left" style="margin: 0 1em 1em 0;">
+	    {% endif %}
+	    <p>{{ entry.anounce|safe }}</p>
+	</li>        
 {% empty %}
 	Новостей нет	
 {% endfor %}
+</ul>
 
 {% ifnotequal paginator.num_pages 1 %}
 <div class="hr"></div>
@@ -37,8 +41,5 @@
     </span>
 </div>
 {% endifnotequal %}
-
-
-
 
 {% endblock %}
